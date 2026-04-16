@@ -1,0 +1,41 @@
+{
+  "portfolio_insights": [
+    {
+      "insight_title": "Silent Churn Patterns Across Multiple Accounts",
+      "insight_detail": "We've detected 78 silent churn patterns across 30 accounts, indicating a high risk of renewal failure. These patterns are not limited to individual accounts but are systemic across the portfolio.",
+      "evidence": "SILENT CHURN PATTERNS: high_risk_count=30, total_patterns_detected=78",
+      "arr_at_risk": "$14,629,000",
+      "recommended_action": "Review high-risk accounts and develop targeted renewal strategies to mitigate silent churn.",
+      "urgency": "this_week",
+      "insight_type": "silent_churn"
+    },
+    {
+      "insight_title": "CSM Workload Imbalance and Declining Accounts",
+      "insight_detail": "Our CSMs have varying workloads, with Priya Sharma having the highest account count and James Okafor having the highest number of declining accounts. This imbalance may lead to inconsistent renewal outcomes.",
+      "evidence": "CSM WORKLOAD: Priya Sharma (6 accounts), James Okafor (2 declining accounts)",
+      "arr_at_risk": "$2,312,000",
+      "recommended_action": "Rebalance CSM workloads to ensure consistent renewal efforts and address declining accounts.",
+      "urgency": "this_month",
+      "insight_type": "csm_pattern"
+    },
+    {
+      "insight_title": "Industry-Specific Renewal Risks",
+      "insight_detail": "Manufacturing and Travel & Hospitality industries have lower average usage health compared to other sectors, indicating potential renewal risks.",
+      "evidence": "INDUSTRY BREAKDOWN: Manufacturing (avg_usage_health=87.5), Travel & Hospitality (avg_usage_health=67.0)",
+      "arr_at_risk": "$4,321,000",
+      "recommended_action": "Develop targeted renewal strategies for Manufacturing and Travel & Hospitality industries to address potential risks.",
+      "urgency": "this_quarter",
+      "insight_type": "industry_cluster"
+    },
+    {
+      "insight_title": "SDK Sunset and Legacy Workflow Engine Deprecation",
+      "insight_detail": "The upcoming SDK v3.x sunset date and legacy workflow engine deprecation may impact renewal outcomes for accounts using these features.",
+      "evidence": "CHANGELOG CONTEXT: SDK v3.x sunset date (April 30, 2026), legacy workflow engine deprecated (Feb 28, 2026)",
+      "arr_at_risk": "$1,776,000",
+      "recommended_action": "Communicate the sunset dates to affected accounts and offer migration assistance to minimize renewal risks.",
+      "urgency": "this_month",
+      "insight_type": "timing_risk"
+    }
+  ],
+  "top_priority_action": "Review high-risk accounts and develop targeted renewal strategies to mitigate silent churn."
+}
