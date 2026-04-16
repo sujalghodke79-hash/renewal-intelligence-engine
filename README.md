@@ -63,20 +63,20 @@ produces:
 > more negative signal. It is better to over-flag a healthy account than
 > to miss a churning one.
 
----
+
 
 ## 2. Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    DATA SOURCES                                 │
+│                         DATA SOURCES                            │
 │  accounts.csv  usage_metrics.csv  support_tickets.csv           │
-│  csm_notes.txt  nps_responses.csv  changelog.md                 │
+│  csm_notes.txt nps_responses.csv changelog.md                   │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              PART 1: DATA INGESTION                             │
+│                    PART 1: DATA INGESTION                       │
 │  • Load all files with correct dtypes                           │
 │  • Initial type validation                                      │
 │  • Cross-reference checks                                       │
@@ -84,108 +84,116 @@ produces:
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│         PART 2: DATA RECONCILIATION (LangChain)                 │
+│           PART 2: DATA RECONCILIATION (LangChain)               │
 │                                                                 │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌───────────────┐  │
-│  │ CSM Notes       │  │ NPS Processing   │  │ SDK Risk      │  │
-│  │ Parsing (LLM)   │  │ Translation(LLM) │  │ Assessment    │  │
-│  │ Fuzzy Matching  │  │ Contradiction     │  │ vs Changelog  │  │
-│  │ Name → ID       │  │ Detection (LLM)  │  │               │  │
-│  └────────┬────────┘  └────────┬─────────┘  └───────┬───────┘  │
-│           └───────────────────┼────────────────────┘           │
-│                               ▼                                 │
-│                  Cross-Source Conflict Detection                │
+│  ┌─────────────────┐   ┌──────────────────┐   ┌───────────────┐  │
+│  │ CSM Notes       │   │ NPS Processing   │   │ SDK Risk      │  │
+│  │ Parsing (LLM)   │   │ Translation (LLM)│   │ Assessment    │  │
+│  │ Fuzzy Matching  │   │ Contradiction    │   │ vs Changelog  │  │
+│  │ Name → ID       │   │ Detection (LLM)  │   │               │  │
+│  └────────┬────────┘   └────────┬─────────┘   └───────┬───────┘  │
+│           └─────────────────────┼─────────────────────┘          │
+│                                 ▼                               │
+│                Cross-Source Conflict Detection                  │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              PART 3: FEATURE ENGINEERING                        │
-│  • Usage trend features (7 metrics × 8 computations)           │
-│  • Support ticket features (volume, severity, status)          │
-│  • NPS features (score, category, contradiction flags)         │
-│  • CSM features (sentiment, competitors, signals)              │
-│  • SDK/Platform features                                        │
-│  • Contract/Firmographic features                               │
-│  • Conflict features                                            │
-│  OUTPUT: Master feature matrix (~108 features per account)     │
+│                 PART 3: FEATURE ENGINEERING                     │
+│  • Usage trend features (7 metrics × 8 computations)            │
+│  • Support ticket features (volume, severity, status)           │
+│  • NPS features (score, category, contradiction flags)          │
+│  • CSM features (sentiment, competitors, signals)               │
+│  • SDK/Platform features                                       │
+│  • Contract/Firmographic features                              │
+│  • Conflict features                                           │
+│                                                                 │
+│  OUTPUT: Master feature matrix (~108 features per account)      │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │           PART 4: LLM DEEP ANALYSIS (LangChain)                 │
 │                                                                 │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌───────────────┐  │
-│  │ Changelog       │  │ Silent Churn     │  │ Portfolio     │  │
-│  │ Impact Analysis │  │ Pattern          │  │ Insights      │  │
-│  │ per account     │  │ Detection (LLM)  │  │ (LLM)        │  │
-│  └─────────────────┘  └──────────────────┘  └───────────────┘  │
+│  ┌─────────────────┐   ┌──────────────────┐   ┌───────────────┐  │
+│  │ Changelog       │   │ Silent Churn     │   │ Portfolio     │  │
+│  │ Impact Analysis │   │ Pattern Detection│   │ Insights      │  │
+│  │ per account     │   │ (LLM)            │   │ (LLM)         │  │
+│  └─────────────────┘   └──────────────────┘   └───────────────┘  │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│           PART 5: RISK SCORING (LangGraph)                      │
+│              PART 5: RISK SCORING (LangGraph)                   │
 │                                                                 │
-│  quantitative_score → qualitative_assessment (LLM)             │
-│  → conflict_resolution → final_risk → confidence               │
+│  quantitative_score → qualitative_assessment (LLM)              │
+│  → conflict_resolution → final_risk → confidence                │
 │                                                                 │
-│  OUTPUT: Risk score (0-100) + Tier (High/Medium/Low)           │
+│  OUTPUT: Risk score (0–100) + Tier (High/Medium/Low)            │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│         PART 6: EXPLANATION GENERATION (LangChain)             │
-│  • Per-account risk narratives (LLM)                           │
-│  • Executive summary (LLM)                                     │
+│         PART 6: EXPLANATION GENERATION (LangChain)              │
+│  • Per-account risk narratives (LLM)                            │
+│  • Executive summary (LLM)                                      │
 │  • CSM briefings (LLM)                                         │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│              PART 7: INTERFACES                                 │
-│         CLI (Rich terminal)  +  Streamlit Dashboard            │
+│                     PART 7: INTERFACES                          │
+│  CLI (Rich terminal) + Streamlit Dashboard                      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### LangGraph State Machine (Part 5)
+---
+
+## LangGraph State Machine (Part 5)
 
 ```
 AccountRiskState
       │
       ▼
-[quantitative_score] ──── Weighted health scores + urgency/ARR multipliers
+[quantitative_score]
+  ── Weighted health scores + urgency/ARR multipliers
       │
       ▼
-[qualitative_assessment] ── LLM: nuances, competitors, org changes → ±15 adjustment
+[qualitative_assessment]
+  ── LLM: nuances, competitors, org changes → ±15 adjustment
       │
       ▼
-[conflict_resolution] ──── Trust hierarchy when sources disagree → 0-20 adjustment
+[conflict_resolution]
+  ── Trust hierarchy when sources disagree → 0–20 adjustment
       │
       ▼
-[final_risk] ────────────── Combine + override rules + recommended actions
+[final_risk]
+  ── Combine + override rules + recommended actions
       │
       ▼
-[confidence] ────────────── Data completeness + signal agreement → high/medium/low
+[confidence]
+  ── Data completeness + signal agreement → high/medium/low
       │
       ▼
-    [END]
+[END]
 ```
 
 ---
 
 ## 3. Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Language | Python 3.11+ | Primary language |
-| LLM Orchestration | LangChain 0.3.x | Prompt templates, chains, output parsers |
-| Agentic Pipeline | LangGraph 0.2.x | Stateful multi-step risk assessment graph |
-| LLM Provider (fast) | Groq (llama-3.1-8b-instant) | CSM parsing, NPS translation, scoring |
-| LLM Provider (capable) | OpenRouter (llama-3.1-70b) | Portfolio insights, complex analysis |
-| Data Processing | Pandas, NumPy | Feature engineering, data manipulation |
-| Fuzzy Matching | FuzzyWuzzy + python-Levenshtein | Account name reconciliation |
-| CLI | Rich | Beautiful terminal output |
-| Dashboard | Streamlit + Plotly | Interactive web UI |
-| Output Parsing | Pydantic v2 | Structured LLM output validation |
+| Layer                  | Technology                      | Purpose                                   |
+| ---------------------- | ------------------------------- | ----------------------------------------- |
+| Language               | Python 3.11+                    | Primary language                          |
+| LLM Orchestration      | LangChain 0.3.x                 | Prompt templates, chains, output parsers  |
+| Agentic Pipeline       | LangGraph 0.2.x                 | Stateful multi-step risk assessment graph |
+| LLM Provider (fast)    | Groq (llama-3.1-8b-instant)     | CSM parsing, NPS translation, scoring     |
+| LLM Provider (capable) | OpenRouter (llama-3.1-70b)      | Portfolio insights, complex analysis      |
+| Data Processing        | Pandas, NumPy                   | Feature engineering, data manipulation    |
+| Fuzzy Matching         | FuzzyWuzzy + python-Levenshtein | Account name reconciliation               |
+| CLI                    | Rich                            | Beautiful terminal output                 |
+| Dashboard              | Streamlit + Plotly              | Interactive web UI                        |
+| Output Parsing         | Pydantic v2                     | Structured LLM output validation          |
 
 ---
 
@@ -214,32 +222,32 @@ renewal-intelligence-engine/
 │   └── explanation_generator.py   # Generate narratives and summaries
 │
 ├── outputs/                       # Generated outputs (auto-created)
-│   ├── risk_scored_accounts.csv   # Main output: all accounts with scores
-│   ├── all_account_features.csv   # Full feature matrix (120 accounts)
-│   ├── renewal_account_features.csv # Features for renewal window only
-│   ├── executive_summary.md       # Leadership briefing
-│   ├── account_narratives.md      # Per-account risk narratives
-│   ├── csm_briefings.md           # CSM-specific briefings
-│   ├── changelog_impacts.csv      # Product change impacts per account
-│   ├── silent_churn_analysis.csv  # Silent churn patterns
-│   └── portfolio_insights.json    # Non-obvious portfolio insights
+│   ├── risk_scored_accounts.csv
+│   ├── all_account_features.csv
+│   ├── renewal_account_features.csv
+│   ├── executive_summary.md
+│   ├── account_narratives.md
+│   ├── csm_briefings.md
+│   ├── changelog_impacts.csv
+│   ├── silent_churn_analysis.csv
+│   └── portfolio_insights.json
 │
 ├── app.py                         # Streamlit dashboard
 ├── cli.py                         # CLI tool
 │
-├── test_part1.py                  # Test: data ingestion
-├── test_part2.py                  # Test: data reconciliation
-├── test_part3.py                  # Test: feature engineering
-├── test_part4.py                  # Test: LLM pipeline
-├── test_part5.py                  # Test: risk scoring
-├── test_final.py                  # End-to-end test
+├── tests/
+│   ├── test_part1.py              # Data ingestion
+│   ├── test_part2.py              # Data reconciliation
+│   ├── test_part3.py              # Feature engineering
+│   ├── test_part4.py              # LLM pipeline
+│   ├── test_part5.py              # Risk scoring
+│   └── test_final.py              # End-to-end test
 │
 ├── requirements.txt               # Python dependencies
 ├── .env                           # API keys (not committed)
-└── README.md                      # This file
+└── README.md                      # Project documentation
 ```
 
----
 
 ## 5. Quick Start
 
